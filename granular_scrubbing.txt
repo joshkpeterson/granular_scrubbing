@@ -1,0 +1,27 @@
+(
+var sndBuf, grainDef, grainBaby, score;
+var sndDur;
+score = CtkScore.new;
+
+// first - create a buffer and tell it that you want to read the whole sound into memory with 
+// change the path point to a soundfile on your computer - wav or aif/aiff
+sndBuf = CtkBuffer.playbuf("/path/to/your/sound.wav", channels: [0]).load(sync: true);
+
+grainDef = CtkSynthDef(\playback2, {arg buffer = sndBuf, noteDur = 20;
+	var src, env, envGen, trigger, grainPan = 0, grainPos, grainRate, grainSize;
+
+	trigger = Dust.kr(30);
+	
+	//position in the sound file it samples from - modulated by LF Noise for effect
+	grainPos = MouseX.kr(0, 1, 0) * LFNoise1.kr(10).range(0.9, 1.1); 	
+	grainRate = MouseY.kr(1, 2, 0);
+	grainSize = LFNoise2.kr(15).range(0.01, 0.23);
+	
+	// granular playback
+	src = GrainBuf.ar(2, trigger, grainSize, buffer, grainRate, grainPos, 4,
+		0, -1);
+	Out.ar(0, src * 0.1)
+});
+
+grainBaby = grainDef.new().buffer_(sndBuf).play;
+)
